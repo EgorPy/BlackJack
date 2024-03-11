@@ -78,7 +78,12 @@ class Game:
             image_pos=[-i * 343, 0],
             size=[320, 460],
             pos=[i * 320, -i * 50 - 460]
-        ) for i in range(9)]
+        ) for i in range(3)]
+        self.CARD_WIDTH = 343
+        # Variables to store the dragging state
+        self.dragging = False
+        self.drag_offset_x = 0
+        self.total_cards_width = len(self.cards) * self.CARD_WIDTH
 
     def change_mode(self, mode):
         """
@@ -150,26 +155,33 @@ class Game:
 
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    # Get the initial mouse position when clicked
-                    self.prev_mouse_pos = pygame.mouse.get_pos()
+                    if event.button == 1:  # Left mouse button
+                        # Check if the mouse is clicked within any card
+                        for card in self.cards:
+                            if card.pos[0] <= event.pos[0] <= card.pos[0] + card.size[0] and \
+                                    card.pos[1] <= event.pos[1] <= card.pos[1] + card.size[1]:
+                                self.dragging = True
+                                # Calculate the offset from the card's left edge to the mouse position
+                                self.drag_offset_x = event.pos[0] - card.pos[0]
+                                break
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:  # Left mouse button
+                        self.dragging = False
+                if event.type == pygame.MOUSEMOTION:
+                    if self.dragging:
+                        # Calculate the new position for each card based on the mouse position and the offset
+                        for i, card in enumerate(self.cards):
+                            card.pos[0] = event.pos[0] - self.drag_offset_x + i * self.CARD_WIDTH
 
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    # Reset prev_mouse_position when mouse button is released
-                    self.prev_mouse_pos = None
-                    self.mouse_dx = 0
+                        # Ensure the cards stay within bounds
+                        # for card in self.cards:
+                        #     if card.pos[0] < 0:
+                        #         card.pos[0] = 0
+                        #     elif card.pos[0] > self.app.WIDTH - self.total_cards_width:
+                        #         card.pos[0] = self.app.WIDTH - self.total_cards_width
 
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
-                # Update card positions if the left mouse button is held down
-            if mouse_buttons[0] and self.prev_mouse_pos:
-                self.mouse_dx = mouse_position[0] - self.prev_mouse_pos[0]
-
-                # Update the position of each card
-                for i, card in enumerate(self.cards):
-                    card.pos[0] += self.mouse_dx
-                    card.update()
-
-            else:
-                for card in self.cards:
-                    card.update()
+            for card in self.cards:
+                card.update()
