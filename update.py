@@ -28,11 +28,14 @@ class Game:
 
         # game settings variables that you can change (DEFAULT SETTINGS)
         self.scroll_scale = 40
+        self.cards_dealt = 2  # how many cards player and computer will get at the start
         self.background_image = pygame.transform.scale(pygame.image.load("background.jpg"), [self.app.WIDTH, self.app.HEIGHT])
 
         # settings variables
         self.SETTINGS_OBJECTS_CREATED = False
         self.FPS_ENABLED = False
+        self.prev_mouse_pos = [0, 0]
+        self.mouse_dx = 0
         self.fps_label = Label(self, foreground=(0, 255, 0), font_size=40, font_name="Courier").percent(95, 2)
 
         self.create_menu_objects()
@@ -53,9 +56,9 @@ class Game:
     def create_info_objects(self):
         """ Init info objects """
 
-        self.info_text = Text(self, text=info_text_message.format(self.version)).percent_y(-3)
+        self.info_text = Text(self, text=info_text_message.format(self.version)).percent_y(-3, percent_x(self, 25))
 
-        self.back_button = Button(self, text=button_back_message).percent(8, 75)
+        self.back_button = Button(self, text=button_back_message).percent(8, 50)
 
         self.info_objects.append(self.info_text)
         self.info_objects.append(self.back_button)
@@ -70,7 +73,12 @@ class Game:
 
         self.player_balance = 5000
 
-        self.cards = [Card(self, size=[40, 80], pos=[i * 45, -i * i * 10]) for i in range(40)]
+        self.cards = [Card(
+            self, pygame.image.load("cards.png"),
+            image_pos=[-i * 343, 0],
+            size=[320, 460],
+            pos=[i * 320, -i * 50 - 460]
+        ) for i in range(9)]
 
     def change_mode(self, mode):
         """
@@ -102,9 +110,9 @@ class Game:
 
         if event.type == pygame.MOUSEWHEEL:
             if event.y < 0 and self.info_text.pos[1] > -percent_y(self, 3):
-                self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale)
+                self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
             elif event.y > 0 > self.info_text.pos[1]:
-                self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale)
+                self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
 
     def update(self, mouse_buttons, mouse_position, events, keys):
         """ Main game logic """
@@ -140,8 +148,28 @@ class Game:
         if self.mode == "game":
             self.app.DISPLAY.blit(self.background_image, (0, 0))
 
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Get the initial mouse position when clicked
+                    self.prev_mouse_pos = pygame.mouse.get_pos()
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    # Reset prev_mouse_position when mouse button is released
+                    self.prev_mouse_pos = None
+                    self.mouse_dx = 0
+
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
-            for card in self.cards:
-                card.update()
+                # Update card positions if the left mouse button is held down
+            if mouse_buttons[0] and self.prev_mouse_pos:
+                self.mouse_dx = mouse_position[0] - self.prev_mouse_pos[0]
+
+                # Update the position of each card
+                for i, card in enumerate(self.cards):
+                    card.pos[0] += self.mouse_dx
+                    card.update()
+
+            else:
+                for card in self.cards:
+                    card.update()

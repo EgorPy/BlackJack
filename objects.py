@@ -613,26 +613,56 @@ class Bloom3(Surface):
         self.last_pos = self.pos
 
 
-class Card(Pos):
+class Card(Surface):
     """ Main game object """
 
-    def __init__(self, game, i=1, pos=None, size=None, color=(255, 255, 255)):
-        super().__init__(pos)
+    types = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
+    # J = Jack
+    # Q = Queen
+    # K = King
+    # A = Ace
+
+    suits = ["1", "2", "3", "4"]
+
+    # 1 = Hearts
+    # 2 = Spades
+    # 3 = Diamonds
+    # 4 = Clubs
+
+    # 2_1, 2_2, 2_3, 2_4
+    # 3_1, 3_2, 3_3, 3_4
+    # 4_1, 4_2, 4_3, 4_4
+    # 5_1, 5_2, 5_3, 5_4
+    # 6_1, 6_2, 6_3, 6_4
+    # 7_1, 7_2, 7_3, 7_4
+    # 8_1, 8_2, 8_3, 8_4
+    # 9_1, 9_2, 9_3, 9_4
+    # 10_1, 10_2, 10_3, 10_4
+    # J_1, J_2, J_3, J_4
+    # Q_1, Q_2, Q_3, Q_4
+    # K_1, K_2, K_3, K_4
+    # A_1, A_2, A_3, A_4
+
+    def __init__(self, game, image, image_pos=None, type="2", suit="1", pos=None, size=None, colorkey=(0, 0, 0)):
         self.game = game
-        self.color = color
-        self.i = i
-        if size == None:
-            self.size = [250, percent_y(game, 45)]
+        self.image = image
+        self.type = type
+        self.suit = suit
+        if image_pos is None:
+            self.image_pos = [0, 0]
         else:
-            self.size = size
+            self.image_pos = image_pos
+
+        super().__init__(game, size=size, pos=pos, colorkey=colorkey)
+        self.surface.blit(self.image, self.image_pos)
 
     def update(self):
         """ Display object """
 
         if self.pos[1] < percent_y(self.game, 15):
-            self.pos[1] += (percent_y(self.game, 16) - self.pos[1]) // 10 * self.game.app.delta_time * self.game.app.MAX_FPS
+            self.pos[1] += (percent_y(self.game, 16) - self.pos[1]) // 50 * self.game.app.delta_time * self.game.app.MAX_FPS
         else:
             self.pos[1] = percent_y(self.game, 15)
 
-        pygame.draw.rect(self.game.app.DISPLAY, self.color, pygame.Rect(self.pos, self.size), border_radius=10)
+        self.game.app.DISPLAY.blit(self.surface, self.pos)
