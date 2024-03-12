@@ -5,7 +5,6 @@ Update method of this class is called every 0.02 seconds (60 FPS (Depends on wha
 """
 
 import pygame
-
 import game_objects
 from objects import *
 from messages import *
@@ -76,12 +75,13 @@ class Game:
         # do not change these values
         self.CARD_WIDTH = 160
         self.CARD_HEIGHT = 230
-        self.CARD_MARGIN = 11.5
+        self.CARD_MARGIN_X = 11.5
+        self.CARD_MARGIN_Y = 9
 
         # variables to store the dragging state
         self.dragging = False
         self.drag_offset_x = 0
-        self.total_cards_width = self.cards_count * (self.CARD_WIDTH + self.CARD_MARGIN)
+        self.total_cards_width = self.cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
 
         # create game logic objects
         self.deck = game_objects.Deck()
@@ -96,11 +96,18 @@ class Game:
         print("\nYour hand:", self.player)
         print("Total value:", self.player.get_value())
 
+        # deck of cards represented by numbers from 2 to 14
+        # value
+        x = [card.value for card in self.player.cards]
+        # suit
+        y = [card.suit for card in self.player.cards]
+
         self.cards = [Card(
             self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
-            image_pos=[-i * (self.CARD_WIDTH + self.CARD_MARGIN), 0],
+            image_pos=[-(x[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
             size=[self.CARD_WIDTH, self.CARD_HEIGHT],
-            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN),
+            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                  -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
         ) for i in range(self.cards_count)]
 
