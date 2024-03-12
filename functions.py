@@ -17,44 +17,13 @@ def percent_x(game, percent=0):
     return one_percent * percent
 
 
-def touched_up(y1: int, height1: int, y2: int) -> bool:  # height2
-    """ Checks if one object is touching up of other object """
-
-    # if y1 < (y2 - height2) < (y1 + height1):
-    if y1 > y2 + height1:
-        return True
-
-
-def touched_down(y1: int, height1: int, y2: int, height2: int) -> bool:
-    """ Checks if one object is touching down of other object """
-
-    # if y2 < (y1 + height1) < (y2 + height2):
-    if y1 + height1 < y2 + height2:
-        return True
-
-
-def touched_left(x1: int, width1: int, x2: int, width2: int) -> bool:
-    """ Checks if one object is touching left of other object """
-
-    if x2 < (x1 - width1) < (x2 + width2):
-        return True
-
-
-def touched_right(x1: int, width1: int, x2: int, width2: int) -> bool:
-    """ Checks if one object is touching right of other object """
-
-    if x2 < (x1 + width1) < (x2 + width2):
-        return True
-
-
-def touched(x1: int, weight1: int, x2: int, weight2: int, y1: int, height1: int, y2: int, height2: int) -> bool:
+def touched(x1: int, width1: int, x2: int, width2: int, y1: int, height1: int, y2: int, height2: int) -> bool:
     """ Checks if one object is touching other object """
 
-    if (x1 <= x2 <= (x1 + weight1) and y1 <= y2 <= (y1 + height1)) or (
-            x1 <= (x2 + weight2) and (x1 + weight1) >= x2 and y1 <= (y2 + height2) and (y1 + height1) >= y2):
+    if ((x1 <= x2 <= (x1 + width1) and y1 <= y2 <= (y1 + height1)) or
+            (x1 <= (x2 + width2) and (x1 + width1) >= x2 and y1 <= (y2 + height2) and (y1 + height1) >= y2)):
         return True
-    else:
-        return False
+    return False
 
 
 def deg_to_rad(degree: float) -> float:

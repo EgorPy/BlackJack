@@ -19,6 +19,11 @@ info_text_message = """
 Версия игры: {}
 """
 
+hearts_message = "Черви"
+diamonds_message = "Бубны"
+clubs_message = "Крести"
+spades_message = "Пики"
+
 # label texts
 game_title_message = "Блэк Джек"
 

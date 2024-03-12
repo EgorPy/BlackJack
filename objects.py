@@ -644,11 +644,10 @@ class Card(Surface):
     # K_1, K_2, K_3, K_4
     # A_1, A_2, A_3, A_4
 
-    def __init__(self, game, image, image_pos=None, type="2", suit="1", pos=None, size=None, colorkey=(0, 0, 0)):
+    def __init__(self, game, image, image_pos=None, pos=None, size=None, colorkey=(0, 0, 0),
+                 stop_show_percent=70, stop_show_coef=25):
         self.game = game
         self.image = image
-        self.type = type
-        self.suit = suit
         if image_pos is None:
             self.image_pos = [0, 0]
         else:
@@ -657,12 +656,16 @@ class Card(Surface):
         super().__init__(game, size=size, pos=pos, colorkey=colorkey)
         self.surface.blit(self.image, self.image_pos)
 
+        # show animation variables
+        self.stop_show_percent = stop_show_percent
+        self.stop_show_coef = stop_show_coef
+
     def update(self):
         """ Display object """
 
-        if self.pos[1] < percent_y(self.game, 15):
-            self.pos[1] += (percent_y(self.game, 16) - self.pos[1]) // 50 * self.game.app.delta_time * self.game.app.MAX_FPS
+        if self.pos[1] < percent_y(self.game, self.stop_show_percent):
+            self.pos[1] += (percent_y(self.game, self.stop_show_percent + 1) - self.pos[1]) // self.stop_show_coef
         else:
-            self.pos[1] = percent_y(self.game, 15)
+            self.pos[1] = percent_y(self.game, self.stop_show_percent)
 
-        self.game.app.DISPLAY.blit(self.surface, self.pos)
+        self.game.app.DISPLAY.blit(pygame.transform.scale(self.surface, self.size), self.pos)

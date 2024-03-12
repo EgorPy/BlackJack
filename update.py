@@ -5,6 +5,8 @@ Update method of this class is called every 0.02 seconds (60 FPS (Depends on wha
 """
 
 import pygame
+
+import game_objects
 from objects import *
 from messages import *
 
@@ -63,27 +65,44 @@ class Game:
         self.info_objects.append(self.info_text)
         self.info_objects.append(self.back_button)
 
-    def new_game(self):
-        """ game variables that you need to reset to make a new game """
-
-        pass
-
     def create_game_objects(self):
         """ Init game objects """
 
         self.player_balance = 5000
+        self.cards_count = 2
 
-        self.cards = [Card(
-            self, pygame.image.load("cards.png"),
-            image_pos=[-i * 343, 0],
-            size=[320, 460],
-            pos=[i * 320, -i * 50 - 460]
-        ) for i in range(3)]
-        self.CARD_WIDTH = 343
-        # Variables to store the dragging state
+        self.CARD_SHOW_STEP = 500
+
+        # do not change these values
+        self.CARD_WIDTH = 160
+        self.CARD_HEIGHT = 230
+        self.CARD_MARGIN = 11.5
+
+        # variables to store the dragging state
         self.dragging = False
         self.drag_offset_x = 0
-        self.total_cards_width = len(self.cards) * self.CARD_WIDTH
+        self.total_cards_width = self.cards_count * (self.CARD_WIDTH + self.CARD_MARGIN)
+
+        # create game logic objects
+        self.deck = game_objects.Deck()
+        self.player = game_objects.Player()
+        self.computer = game_objects.Player()
+
+        self.player.add_card(self.deck.deal_card())
+        self.computer.add_card(self.deck.deal_card())
+        self.player.add_card(self.deck.deal_card())
+        self.computer.add_card(self.deck.deal_card())
+
+        print("\nYour hand:", self.player)
+        print("Total value:", self.player.get_value())
+
+        self.cards = [Card(
+            self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
+            image_pos=[-i * (self.CARD_WIDTH + self.CARD_MARGIN), 0],
+            size=[self.CARD_WIDTH, self.CARD_HEIGHT],
+            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN),
+                 -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
+        ) for i in range(self.cards_count)]
 
     def change_mode(self, mode):
         """
@@ -158,27 +177,26 @@ class Game:
                     if event.button == 1:  # Left mouse button
                         # Check if the mouse is clicked within any card
                         for card in self.cards:
-                            if card.pos[0] <= event.pos[0] <= card.pos[0] + card.size[0] and \
-                                    card.pos[1] <= event.pos[1] <= card.pos[1] + card.size[1]:
+                            if touched(card.pos[0], card.size[0], event.pos[0], 1,
+                                       card.pos[1], card.size[1], event.pos[1], 1):
                                 self.dragging = True
-                                # Calculate the offset from the card's left edge to the mouse position
+                                # Calculate the offset from the mouse position to the card's position
                                 self.drag_offset_x = event.pos[0] - card.pos[0]
+                                # Store the initial mouse position
+                                self.prev_mouse_pos = event.pos
                                 break
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:  # Left mouse button
                         self.dragging = False
                 if event.type == pygame.MOUSEMOTION:
                     if self.dragging:
-                        # Calculate the new position for each card based on the mouse position and the offset
-                        for i, card in enumerate(self.cards):
-                            card.pos[0] = event.pos[0] - self.drag_offset_x + i * self.CARD_WIDTH
-
-                        # Ensure the cards stay within bounds
-                        # for card in self.cards:
-                        #     if card.pos[0] < 0:
-                        #         card.pos[0] = 0
-                        #     elif card.pos[0] > self.app.WIDTH - self.total_cards_width:
-                        #         card.pos[0] = self.app.WIDTH - self.total_cards_width
+                        # Calculate the difference in mouse position
+                        mouse_dx = event.pos[0] - self.prev_mouse_pos[0]
+                        # Update the position of each card based on the difference
+                        for card in self.cards:
+                            card.pos[0] += mouse_dx
+                        # Update the previous mouse position
+                        self.prev_mouse_pos = event.pos
 
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
