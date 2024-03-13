@@ -26,6 +26,7 @@ class Game:
         # app lists
         self.menu_objects = []
         self.info_objects = []
+        self.bid_objects = []
 
         # game settings variables that you can change (DEFAULT SETTINGS)
         self.scroll_scale = 40
@@ -47,24 +48,17 @@ class Game:
         self.game_title_label = Label(self, text=game_title_message).percent_y(10)
         self.play_button = Button(self, text=button_play_message).percent_y(35)
         self.info_button = Button(self, text=button_info_message).percent_y(55)
-
-        self.bid_label = Label(self, text="Ваша ставка: ").percent_y(50, 50)
-        self.entry = Entry(self, text="5000").percent_y(50, 600)
-
         self.exit_button = Button(self, text=button_exit_message).percent_y(75)
 
         self.menu_objects.append(self.game_title_label)
         self.menu_objects.append(self.play_button)
         self.menu_objects.append(self.info_button)
-        self.menu_objects.append(self.bid_label)
-        self.menu_objects.append(self.entry)
         self.menu_objects.append(self.exit_button)
 
     def create_info_objects(self):
         """ Init info objects """
 
         self.info_text = Text(self, text=info_text_message.format(self.version)).percent_y(-3, percent_x(self, 25))
-
         self.back_button = Button(self, text=button_back_message).percent(8, 50)
 
         self.info_objects.append(self.info_text)
@@ -73,7 +67,7 @@ class Game:
     def create_game_objects(self):
         """ Init game objects """
 
-        self.is_bid = True
+        self.is_bid = False
 
         self.player_balance = 5000
         self.cards_count = 2
@@ -133,6 +127,27 @@ class Game:
             stop_show_percent=10
         ) for i in range(self.cards_count)]
 
+        self.create_bid_objects()
+
+    def create_bid_objects(self):
+        """ Init bid game phase objects """
+
+        self.bid_main_label = Label(self, text=make_bid_message).percent_y(10)
+        self.balance_label = Label(self, text=your_balance_message.format(self.player_balance), font_size=70).percent_y(35)
+        self.bid_label = Label(self, text=your_bid_message, font_size=70).percent_y(55)
+        self.bid_entry = Entry(self, text=str(self.player_balance), font_size=70)
+        self.bid_label.pos[0] -= self.bid_entry.size[0] // 2
+        self.bid_entry.pos = [self.bid_label.pos[0] + self.bid_label.size[0], self.bid_label.pos[1]]
+        self.start_game_button = Button(self, text=start_game_message).percent_y(75)
+        self.back_button = Button(self, text=button_back_message).percent(8, 80)
+
+        self.bid_objects.append(self.bid_main_label)
+        self.bid_objects.append(self.balance_label)
+        self.bid_objects.append(self.bid_label)
+        self.bid_objects.append(self.bid_entry)
+        self.bid_objects.append(self.start_game_button)
+        self.bid_objects.append(self.back_button)
+
     def change_mode(self, mode):
         """
         Changes mode to a new mode if it's matches one of the possible modes,
@@ -143,6 +158,7 @@ class Game:
             """ Clears all variables of all modes except settings """
 
             self.menu_objects.clear()
+            self.bid_objects.clear()
             self.info_objects.clear()
 
         if mode == "menu":
@@ -167,6 +183,16 @@ class Game:
             elif event.y > 0 > self.info_text.pos[1]:
                 self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
 
+    def check_start_game(self):
+        """ Check if player can enter a game """
+
+        bid = int(self.bid_entry.text)
+        if bid > self.player_balance:
+            return
+        if bid == 0:
+            return
+        self.is_bid = False
+
     def update(self, mouse_buttons, mouse_position, events, keys):
         """ Main game logic """
 
@@ -176,16 +202,10 @@ class Game:
             for obj in self.menu_objects:
                 obj.update()
 
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    self.entry.enter_key(pygame.key.name(event.key))
-
             if self.play_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("game")
             if self.info_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("info")
-            if self.entry.clicked(mouse_buttons, mouse_position):
-                self.entry.is_selected = True
             if self.exit_button.clicked(mouse_buttons, mouse_position):
                 self.app.RUN = False
 
@@ -207,10 +227,22 @@ class Game:
         if self.mode == "game":
             self.app.DISPLAY.blit(self.background_image, (0, 0))
 
-            if keys[pygame.K_ESCAPE]:
-                self.change_mode("menu")
-
             if self.is_bid:
+                if self.back_button.clicked(mouse_buttons, mouse_position) or keys[pygame.K_ESCAPE]:
+                    self.change_mode("menu")
+
+                for event in events:
+                    if event.type == pygame.KEYDOWN:
+                        self.bid_entry.enter_key(pygame.key.name(event.key))
+
+                if self.bid_entry.clicked(mouse_buttons, mouse_position):
+                    self.bid_entry.is_selected = True
+                if self.start_game_button.clicked(mouse_buttons, mouse_position):
+                    self.check_start_game()
+
+                for obj in self.bid_objects:
+                    obj.update()
+
                 return
 
             for event in events:

@@ -49,6 +49,11 @@ cards_suits_message = {
 
 # label texts
 game_title_message = "Блэк Джек"
+make_bid_message = "Сделайте ставку"
+# {} = player balance
+your_balance_message = "Ваш баланс: {}"
+your_bid_message = "Ваша ставка: "
+start_game_message = "Начать игру"
 
 # button texts
 button_play_message = "Играть"
