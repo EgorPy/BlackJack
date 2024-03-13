@@ -47,11 +47,17 @@ class Game:
         self.game_title_label = Label(self, text=game_title_message).percent_y(10)
         self.play_button = Button(self, text=button_play_message).percent_y(35)
         self.info_button = Button(self, text=button_info_message).percent_y(55)
+
+        self.bid_label = Label(self, text="Ваша ставка: ").percent_y(50, 50)
+        self.entry = Entry(self, text="5000").percent_y(50, 600)
+
         self.exit_button = Button(self, text=button_exit_message).percent_y(75)
 
         self.menu_objects.append(self.game_title_label)
         self.menu_objects.append(self.play_button)
         self.menu_objects.append(self.info_button)
+        self.menu_objects.append(self.bid_label)
+        self.menu_objects.append(self.entry)
         self.menu_objects.append(self.exit_button)
 
     def create_info_objects(self):
@@ -66,6 +72,8 @@ class Game:
 
     def create_game_objects(self):
         """ Init game objects """
+
+        self.is_bid = True
 
         self.player_balance = 5000
         self.cards_count = 2
@@ -96,19 +104,33 @@ class Game:
         print("\nYour hand:", self.player)
         print("Total value:", self.player.get_value())
 
-        # deck of cards represented by numbers from 2 to 14
-        # value
-        x = [card.value for card in self.player.cards]
-        # suit
-        y = [card.suit for card in self.player.cards]
+        # player's deck of cards represented by numbers from 2 to 14
+        x1 = [card.value for card in self.player.cards]
+        y1 = [card.suit for card in self.player.cards]
 
-        self.cards = [Card(
+        # computer's deck of cards represented by numbers from 2 to 14
+        x2 = [card.value for card in self.computer.cards]
+        y2 = [card.suit for card in self.computer.cards]
+        x2[0] = 15
+        y2[0] = 2
+
+        self.player_cards = [Card(
             self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
-            image_pos=[-(x[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
-                       -y[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
+            image_pos=[-(x1[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y1[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
+            size=[self.CARD_WIDTH, self.CARD_HEIGHT],
+            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                 -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT]
+        ) for i in range(self.cards_count)]
+
+        self.computer_cards = [Card(
+            self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
+            image_pos=[-(x2[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y2[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
             size=[self.CARD_WIDTH, self.CARD_HEIGHT],
             pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                  -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
+            stop_show_percent=10
         ) for i in range(self.cards_count)]
 
     def change_mode(self, mode):
@@ -154,10 +176,16 @@ class Game:
             for obj in self.menu_objects:
                 obj.update()
 
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    self.entry.enter_key(pygame.key.name(event.key))
+
             if self.play_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("game")
             if self.info_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("info")
+            if self.entry.clicked(mouse_buttons, mouse_position):
+                self.entry.is_selected = True
             if self.exit_button.clicked(mouse_buttons, mouse_position):
                 self.app.RUN = False
 
@@ -179,34 +207,31 @@ class Game:
         if self.mode == "game":
             self.app.DISPLAY.blit(self.background_image, (0, 0))
 
-            for event in events:
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left mouse button
-                        # Check if the mouse is clicked within any card
-                        for card in self.cards:
-                            if touched(card.pos[0], card.size[0], event.pos[0], 1,
-                                       card.pos[1], card.size[1], event.pos[1], 1):
-                                self.dragging = True
-                                # Calculate the offset from the mouse position to the card's position
-                                self.drag_offset_x = event.pos[0] - card.pos[0]
-                                # Store the initial mouse position
-                                self.prev_mouse_pos = event.pos
-                                break
-                if event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1:  # Left mouse button
-                        self.dragging = False
-                if event.type == pygame.MOUSEMOTION:
-                    if self.dragging:
-                        # Calculate the difference in mouse position
-                        mouse_dx = event.pos[0] - self.prev_mouse_pos[0]
-                        # Update the position of each card based on the difference
-                        for card in self.cards:
-                            card.pos[0] += mouse_dx
-                        # Update the previous mouse position
-                        self.prev_mouse_pos = event.pos
-
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
-            for card in self.cards:
+            if self.is_bid:
+                return
+
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    for card in self.player_cards:
+                        if touched(card.pos[0], card.size[0], event.pos[0], 1,
+                                   card.pos[1], card.size[1], event.pos[1], 1):
+                            self.dragging = True
+                            self.drag_offset_x = event.pos[0] - card.pos[0]
+                            self.prev_mouse_pos = event.pos
+                            break
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    self.dragging = False
+                if event.type == pygame.MOUSEMOTION and self.dragging:
+                    mouse_dx = event.pos[0] - self.prev_mouse_pos[0]
+                    for card in self.player_cards:
+                        card.pos[0] += mouse_dx
+                    self.prev_mouse_pos = event.pos
+
+            for card in self.player_cards:
+                card.update()
+
+            for card in self.computer_cards:
                 card.update()

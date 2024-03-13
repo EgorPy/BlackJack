@@ -178,7 +178,7 @@ class Label(Pos):
         if background:
             self.background = background
         self.surface = self.font.render(self.text, self.smooth, self.foreground, self.background)
-        self.size = self.surface.get_size()
+        self.size = list(self.surface.get_size())
 
     def center_x(self, y=0):
         """ Places label at the center of game app screen width """
@@ -252,8 +252,7 @@ class Button(Label):
         if mouse_buttons[0] and touched(x1, 1, x2, w2, y1, 1, y2, h2) and self.counter <= 0:
             self.counter = self.counter_max
             return True
-        else:
-            return False
+        return False
 
 
 class OptionButton(Button):
@@ -422,6 +421,89 @@ class Text(Label):
         """ Shows the surface of Text on a game app display """
 
         [self.game.app.DISPLAY.blit(self.surface_list[i], self.pos_list[i]) for i in range(self.strings_count)]
+
+
+class Entry(Button):
+    def __init__(self, game, pos=None, font_name="Segoe UI", font_size=100, bold=False, smooth=True,
+                 foreground=(200, 200, 200), text="", background=None, length=4, is_selected=False, is_focused=False):
+        super().__init__(game, text, pos, font_name, font_size, bold, smooth=smooth, foreground=foreground, background=background)
+
+        self.length = length
+        self.is_selected = is_selected
+        self.is_focused = is_focused
+
+    def enter_key(self, key="", all_keys=False):
+        """ Enters key to the entry """
+
+        if not self.is_selected:
+            return
+        if key == "backspace":
+            self.text = self.text[:-1]
+            if len(self.text) == 0 and not all_keys:
+                self.text = "0"
+            return self.update_text(self.text)
+        if len(self.text) >= self.length:
+            return
+        if all_keys:
+            self.text += key
+        elif key.isdigit():
+            if self.text == "0":
+                self.text = key
+            else:
+                self.text += key
+        return self.update_text(self.text)
+
+    def clicked(self, mouse_buttons, mouse_position):
+        """ Checks if button is clicked or not """
+
+        x1 = mouse_position[0]
+        x2 = self.pos[0]
+        w2 = self.size[0]
+        y1 = mouse_position[1]
+        y2 = self.pos[1]
+        h2 = self.size[1]
+        if touched(x1, 1, x2, w2, y1, 1, y2, h2):
+            self.is_focused = True
+        else:
+            self.is_focused = False
+        if mouse_buttons[0]:
+            if not self.is_selected and self.is_focused:
+                self.is_selected = True
+                return True
+            if not self.is_focused:
+                self.is_selected = False
+        return False
+
+    def update(self):
+        """ Display object """
+
+        self.game.app.DISPLAY.blit(self.surface, self.pos)
+
+        if self.is_selected or self.is_focused:
+            pygame.draw.rect(self.game.app.DISPLAY, (0, 255, 255), pygame.Rect(self.pos, self.size), 1)
+            return
+        pygame.draw.rect(self.game.app.DISPLAY, self.foreground, pygame.Rect(self.pos, self.size), 1)
+
+    # def update(self, display):
+    #     mousePos = pygame.mouse.get_pos()
+    #     mouse = pygame.mouse.get_pressed(3)
+    #     display.blit(self.surface, self.position)
+    #     if touched(self.position[0], self.size[0], mousePos[0], 1,
+    #                self.position[1], self.size[1], mousePos[1], 1):
+    #         pygame.draw.rect(display, (0, 255, 255),
+    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
+    #         if mouse[0]:
+    #             self.is_selected = True
+    #     else:
+    #         pygame.draw.rect(display, self.foreground,
+    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
+    #         if mouse[0]:
+    #             self.is_selected = False
+    #     if self.is_selected:
+    #         pygame.draw.rect(display, (0, 255, 255),
+    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
+    #     self.__init__(self.position, self.font_name, self.font_size, self.bold, self.smooth, self.foreground, self.text,
+    #                   self.background, self.length, self.is_selected)
 
 
 class Line(Vector):
