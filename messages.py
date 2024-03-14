@@ -54,6 +54,12 @@ make_bid_message = "Сделайте ставку"
 your_balance_message = "Ваш баланс: {}"
 your_bid_message = "Ваша ставка: "
 start_game_message = "Начать игру"
+not_enough_money_message = "Недостаточно денег для ставки"
+cant_bid_zero_message = "Ставка должна быть больше 0"
+button_hit_message = "Взять карту"
+button_stand_message = "Хватит"
+# {} = score
+score_message = "Ваш счёт: {}"
 
 # button texts
 button_play_message = "Играть"

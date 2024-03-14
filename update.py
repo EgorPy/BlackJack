@@ -27,10 +27,11 @@ class Game:
         self.menu_objects = []
         self.info_objects = []
         self.bid_objects = []
+        self.game_objects = []
 
         # game settings variables that you can change (DEFAULT SETTINGS)
         self.scroll_scale = 40
-        self.cards_dealt = 2  # how many cards player and computer will get at the start
+        self.cards_dealt = 2  # how many cards player and dealer (computer) will get at the start
         self.background_image = pygame.transform.scale(pygame.image.load("background.jpg"), [self.app.WIDTH, self.app.HEIGHT])
 
         # settings variables
@@ -67,10 +68,11 @@ class Game:
     def create_game_objects(self):
         """ Init game objects """
 
-        self.is_bid = False
+        self.is_bid = True
 
         self.player_balance = 5000
-        self.cards_count = 2
+        self.player_cards_count = 2
+        self.dealer_cards_count = 2
 
         self.CARD_SHOW_STEP = 500
 
@@ -83,28 +85,26 @@ class Game:
         # variables to store the dragging state
         self.dragging = False
         self.drag_offset_x = 0
-        self.total_cards_width = self.cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+        self.player_cards_width = self.player_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+        self.dealer_cards_width = self.dealer_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
 
         # create game logic objects
         self.deck = game_objects.Deck()
         self.player = game_objects.Player()
-        self.computer = game_objects.Player()
+        self.dealer = game_objects.Player()
 
-        self.player.add_card(self.deck.deal_card())
-        self.computer.add_card(self.deck.deal_card())
-        self.player.add_card(self.deck.deal_card())
-        self.computer.add_card(self.deck.deal_card())
-
-        print("\nYour hand:", self.player)
-        print("Total value:", self.player.get_value())
+        for i in range(self.player_cards_count):
+            self.player.add_card(self.deck.deal_card())
+        for i in range(self.dealer_cards_count):
+            self.dealer.add_card(self.deck.deal_card())
 
         # player's deck of cards represented by numbers from 2 to 14
         x1 = [card.value for card in self.player.cards]
         y1 = [card.suit for card in self.player.cards]
 
-        # computer's deck of cards represented by numbers from 2 to 14
-        x2 = [card.value for card in self.computer.cards]
-        y2 = [card.suit for card in self.computer.cards]
+        # dealer's deck of cards represented by numbers from 2 to 14
+        x2 = [card.value for card in self.dealer.cards]
+        y2 = [card.suit for card in self.dealer.cards]
         x2[0] = 15
         y2[0] = 2
 
@@ -113,27 +113,47 @@ class Game:
             image_pos=[-(x1[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                        -y1[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
             size=[self.CARD_WIDTH, self.CARD_HEIGHT],
-            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+            pos=[(self.app.WIDTH - self.player_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                  -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT]
-        ) for i in range(self.cards_count)]
+        ) for i in range(self.player_cards_count)]
 
-        self.computer_cards = [Card(
+        self.dealer_cards = [Card(
             self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
             image_pos=[-(x2[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                        -y2[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
             size=[self.CARD_WIDTH, self.CARD_HEIGHT],
-            pos=[(self.app.WIDTH - self.total_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+            pos=[(self.app.WIDTH - self.dealer_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                  -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
             stop_show_percent=10
-        ) for i in range(self.cards_count)]
+        ) for i in range(self.player_cards_count)]
 
         self.create_bid_objects()
+        self.create_game_widgets()
+
+    def create_game_widgets(self):
+        """ Init game UI elements """
+
+        self.hit_button = Button(self, text=button_hit_message).percent(10, 80)
+        self.stand_button = Button(self, text=button_stand_message).percent(80, 80)
+        self.score_label = Label(self, text=score_message.format(self.player.get_value()), font_size=60).percent(10, 70)
+
+        self.borders = Surface(self, pos=[0, self.app.HEIGHT - percent_y(self, 35)], size=[self.app.WIDTH, percent_y(self, 35)],
+                               colorkey=(0, 0, 0), alpha=50)
+        self.borders.surface.fill((200, 200, 200))
+        pygame.draw.rect(self.borders.surface, (0, 0, 0), pygame.Rect([percent_x(self, 30), 0],
+                                                                      [percent_x(self, 40), self.borders.size[1]]),
+                         border_radius=30)
+
+        self.game_objects.append(self.hit_button)
+        self.game_objects.append(self.stand_button)
+        self.game_objects.append(self.score_label)
 
     def create_bid_objects(self):
         """ Init bid game phase objects """
 
         self.bid_main_label = Label(self, text=make_bid_message).percent_y(10)
         self.balance_label = Label(self, text=your_balance_message.format(self.player_balance), font_size=70).percent_y(35)
+        self.cant_play_label = Label(self, font_size=100, foreground=(255, 0, 0))
         self.bid_label = Label(self, text=your_bid_message, font_size=70).percent_y(55)
         self.bid_entry = Entry(self, text=str(self.player_balance), font_size=70)
         self.bid_label.pos[0] -= self.bid_entry.size[0] // 2
@@ -143,6 +163,7 @@ class Game:
 
         self.bid_objects.append(self.bid_main_label)
         self.bid_objects.append(self.balance_label)
+        self.bid_objects.append(self.cant_play_label)
         self.bid_objects.append(self.bid_label)
         self.bid_objects.append(self.bid_entry)
         self.bid_objects.append(self.start_game_button)
@@ -159,6 +180,7 @@ class Game:
 
             self.menu_objects.clear()
             self.bid_objects.clear()
+            self.game_objects.clear()
             self.info_objects.clear()
 
         if mode == "menu":
@@ -188,10 +210,65 @@ class Game:
 
         bid = int(self.bid_entry.text)
         if bid > self.player_balance:
+            self.cant_play_label.update_text(not_enough_money_message)
+            self.cant_play_label.percent_y(42)
             return
         if bid == 0:
+            self.cant_play_label.update_text(cant_bid_zero_message)
+            self.cant_play_label.percent_y(42)
             return
         self.is_bid = False
+
+    def add_player_card(self):
+        """ Adds one card to player """
+
+        self.player.add_card(self.deck.deal_card())
+        self.score_label.update_text(score_message.format(self.player.get_value()))
+        x1 = [card.value for card in self.player.cards]
+        y1 = [card.suit for card in self.player.cards]
+        i = self.player_cards_count
+        self.player_cards_count += 1
+        self.player_cards.append(Card(
+            self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
+            image_pos=[-(x1[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y1[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
+            size=[self.CARD_WIDTH, self.CARD_HEIGHT],
+            pos=[(self.app.WIDTH - self.player_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                 -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT]
+        ))
+        self.player_cards_width = self.player_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+        for i, card in enumerate(self.player_cards):
+            card.pos[0] = (self.app.WIDTH - self.player_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+
+    def add_dealer_card(self):
+        """ Adds one card to dealer """
+
+        self.dealer.add_card(self.deck.deal_card())
+        x1 = [card.value for card in self.dealer.cards]
+        y1 = [card.suit for card in self.dealer.cards]
+        i = self.dealer_cards_count
+        self.dealer_cards_count += 1
+        self.dealer_cards.append(Card(
+            self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
+            image_pos=[-(x1[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y1[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
+            size=[self.CARD_WIDTH, self.CARD_HEIGHT],
+            pos=[(self.app.WIDTH - self.dealer_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                 -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
+            stop_show_percent=10
+        ))
+        self.dealer_cards_width = self.dealer_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+        for i, card in enumerate(self.dealer_cards):
+            card.pos[0] = (self.app.WIDTH - self.dealer_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X)
+
+    def dealer_turn(self):
+        """ Dealer's logic """
+
+        while self.dealer.get_value() < 17:
+            print(self.dealer.get_value())
+            self.add_dealer_card()
+            print("Dealer hits.")
+        print(self.dealer.get_value())
 
     def update(self, mouse_buttons, mouse_position, events, keys):
         """ Main game logic """
@@ -256,14 +333,25 @@ class Game:
                             break
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.dragging = False
-                if event.type == pygame.MOUSEMOTION and self.dragging:
+                if (event.type == pygame.MOUSEMOTION and self.dragging and
+                        percent_x(self, 30) < event.pos[0] < percent_x(self, 70)):
                     mouse_dx = event.pos[0] - self.prev_mouse_pos[0]
                     for card in self.player_cards:
                         card.pos[0] += mouse_dx
                     self.prev_mouse_pos = event.pos
 
+            if self.hit_button.clicked(mouse_buttons, mouse_position):
+                self.add_player_card()
+            if self.stand_button.clicked(mouse_buttons, mouse_position):
+                self.dealer_turn()
+
             for card in self.player_cards:
                 card.update()
 
-            for card in self.computer_cards:
+            for card in self.dealer_cards:
                 card.update()
+
+            self.borders.update()
+
+            for obj in self.game_objects:
+                obj.update()
