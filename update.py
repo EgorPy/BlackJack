@@ -4,7 +4,9 @@ This class is invoked in main.py file
 Update method of this class is called every 0.02 seconds (60 FPS (Depends on what the value of self.MAX_FPS is))
 """
 
+import os
 import pygame
+import config
 import game_objects
 from objects import *
 from messages import *
@@ -44,6 +46,25 @@ class Game:
 
         self.create_menu_objects()
 
+    @staticmethod
+    def save_money(money: int):
+        """ Saves player money to the file """
+
+        with open(config.SAVE_MONEY_PATH, "w") as file:
+            file.write(str(money))
+
+    def load_money(self, default=5000):
+        """ Loads player money from the file. If it does not exist, it will return default value """
+
+        if os.path.exists(config.SAVE_MONEY_PATH):
+            with open(config.SAVE_MONEY_PATH, "r") as file:
+                try:
+                    return int(file.readline())
+                except ValueError:
+                    return default
+        self.save_money(default)
+        return default
+
     def create_menu_objects(self):
         """ Init main menu objects """
 
@@ -79,7 +100,7 @@ class Game:
         self.finish_game_counter = 0
         self.game_end_state = ""
 
-        self.player_balance = 5000
+        self.player_balance = self.load_money(5000)
         self.player_cards_count = 2
         self.dealer_cards_count = 2
         self.bid = 0
@@ -171,7 +192,7 @@ class Game:
         self.balance_label = Label(self, text=your_balance_message.format(self.player_balance), font_size=70).percent_y(35)
         self.cant_play_label = Label(self, font_size=100, foreground=(255, 0, 0))
         self.your_bid_label = Label(self, text=your_bid_message, font_size=70).percent_y(55)
-        self.bid_entry = Entry(self, text=str(self.player_balance), font_size=70)
+        self.bid_entry = Entry(self, text=str(self.player_balance), length=len(str(self.player_balance)), font_size=70)
         self.your_bid_label.pos[0] -= self.bid_entry.size[0] // 2
         self.bid_entry.pos = [self.your_bid_label.pos[0] + self.your_bid_label.size[0], self.your_bid_label.pos[1]]
         self.start_game_button = Button(self, text=start_game_message).percent_y(75)
@@ -230,7 +251,7 @@ class Game:
             self.cant_play_label.update_text(not_enough_money_message)
             self.cant_play_label.percent_y(42)
             return
-        if bid == 0:
+        if bid <= 0:
             self.cant_play_label.update_text(cant_bid_zero_message)
             self.cant_play_label.percent_y(42)
             return
@@ -331,24 +352,20 @@ class Game:
         player_value = self.player.get_value()
         dealer_value = self.dealer.get_value()
 
-        print(self.game_end_state)
         if self.game_end_state == "":
             if player_value > dealer_value:
-                print("\nYou win!")
                 self.WIN = True
                 self.game_end_state = "player_wins"
             elif player_value < dealer_value:
-                print("\nDealer wins!")
                 self.LOSE = True
                 self.game_end_state = "dealer_wins"
             else:
-                print("\nIt's a tie!")
                 self.TIE = True
                 self.game_end_state = "tie"
         if self.player_cards_count == 2 and player_value == 21:
             self.WIN = True
             self.game_end_state = "black_jack"
-        print(self.dealer.get_value(), self.player.get_value())
+        self.save_money(self.player_balance + int(self.bid * relative_payments_messages[self.game_end_state]))
         self.create_finish_objects()
 
     def create_finish_objects(self):
@@ -364,9 +381,13 @@ class Game:
         self.player_state_label.percent_y(35)
         self.description_label = Label(self, text=game_end_messages[self.game_end_state], font_size=70).percent_y(45)
         self.back_button = Button(self, text=button_exit_message, foreground=(255, 255, 255), font_size=70).percent(10, 10)
+        self.prize_label = (Label(self, font_size=70,
+                                  text=prize_message.format(int(self.bid * relative_payments_messages[self.game_end_state])))
+                            .percent_y(55))
 
         self.finish_objects.append(self.player_state_label)
         self.finish_objects.append(self.description_label)
+        self.finish_objects.append(self.prize_label)
         self.finish_objects.append(self.back_button)
 
     def update(self, mouse_buttons, mouse_position, events, keys):

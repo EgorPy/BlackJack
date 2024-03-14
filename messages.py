@@ -85,6 +85,8 @@ bid_doubled_message = "Ставка удвоена"
 win_message = "Вы победили!"
 lose_message = "Вы проиграли"
 tie_message = "Ничья"
+# {} = money
+prize_message = "Сумма: {}"
 
 # button texts
 button_play_message = "Играть"
