@@ -49,7 +49,7 @@ cards_suits_messages = {
 
 game_end_messages = {
     "player_busts": "У вас перебор карт",
-    "dealer_busts": "У дилера перебор карт",
+    "dealer_busts": "У крупье перебор карт",
     "black_jack": "Блэк Джек!",
     "player_wins": "Вы набрали больше очков",
     "dealer_wins": "Крупье набрал больше очков",
@@ -82,6 +82,9 @@ score_message = "Ваш счёт: {}"
 bid_message = "Ставка: {}"
 double_bid_message = "Удвоить ставку"
 bid_doubled_message = "Ставка удвоена"
+win_message = "Вы победили!"
+lose_message = "Вы проиграли"
+tie_message = "Ничья"
 
 # button texts
 button_play_message = "Играть"

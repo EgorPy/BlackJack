@@ -28,6 +28,7 @@ class Game:
         self.info_objects = []
         self.bid_objects = []
         self.game_objects = []
+        self.finish_objects = []
 
         # game settings variables that you can change (DEFAULT SETTINGS)
         self.scroll_scale = 40
@@ -76,7 +77,7 @@ class Game:
         self.LOSE = False
         self.TIE = False
         self.finish_game_counter = 0
-        self.game_end_message = ""
+        self.game_end_state = ""
 
         self.player_balance = 5000
         self.player_cards_count = 2
@@ -102,8 +103,9 @@ class Game:
         self.player = game_objects.Player()
         self.dealer = game_objects.Player()
 
-        for i in range(self.player_cards_count):
-            self.player.add_card(self.deck.deal_card())
+        # for i in range(self.player_cards_count):
+        self.player.add_card(self.deck.deal_card())
+        self.player.add_card(self.deck.deal_card())
         for i in range(self.dealer_cards_count):
             self.dealer.add_card(self.deck.deal_card())
 
@@ -196,6 +198,7 @@ class Game:
             self.bid_objects.clear()
             self.game_objects.clear()
             self.info_objects.clear()
+            self.finish_objects.clear()
 
         if mode == "menu":
             self.mode = mode
@@ -258,21 +261,21 @@ class Game:
 
         if self.player.get_value() > 21:
             self.LOSE = True
-            self.game_end_message = game_end_messages["player_busts"]
+            self.game_end_state = "player_busts"
             self.finish()
 
     def add_dealer_card(self):
         """ Adds one card to dealer """
 
         self.dealer.add_card(self.deck.deal_card())
-        x1 = [card.value for card in self.dealer.cards]
-        y1 = [card.suit for card in self.dealer.cards]
+        x2 = [card.value for card in self.dealer.cards]
+        y2 = [card.suit for card in self.dealer.cards]
         i = self.dealer_cards_count
         self.dealer_cards_count += 1
         self.dealer_cards.append(Card(
             self, pygame.transform.scale(pygame.image.load("cards.png"), (2529, 947)),
-            image_pos=[-(x1[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
-                       -y1[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
+            image_pos=[-(x2[i] - 2) * (self.CARD_WIDTH + self.CARD_MARGIN_X),
+                       -y2[i] * (self.CARD_HEIGHT + self.CARD_MARGIN_Y)],
             size=[self.CARD_WIDTH, self.CARD_HEIGHT],
             pos=[(self.app.WIDTH - self.dealer_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X),
                  -i * self.CARD_SHOW_STEP - self.CARD_HEIGHT],
@@ -290,9 +293,9 @@ class Game:
         self.finish_game_counter = 100
         self.start_finish_game_counter = True
 
-        if self.player.get_value() > 21:
+        if self.dealer.get_value() > 21:
             self.WIN = True
-            self.game_end_message = game_end_messages["dealer_busts"]
+            self.game_end_state = "dealer_busts"
             self.finish()
 
     def reveal_dealer_card(self):
@@ -328,25 +331,43 @@ class Game:
         player_value = self.player.get_value()
         dealer_value = self.dealer.get_value()
 
-        if self.game_end_message != "":
-            print(self.game_end_message)
-            return
+        print(self.game_end_state)
+        if self.game_end_state == "":
+            if player_value > dealer_value:
+                print("\nYou win!")
+                self.WIN = True
+                self.game_end_state = "player_wins"
+            elif player_value < dealer_value:
+                print("\nDealer wins!")
+                self.LOSE = True
+                self.game_end_state = "dealer_wins"
+            else:
+                print("\nIt's a tie!")
+                self.TIE = True
+                self.game_end_state = "tie"
         if self.player_cards_count == 2 and player_value == 21:
             self.WIN = True
-            self.game_end_message = game_end_messages["black_jack"]
+            self.game_end_state = "black_jack"
+        print(self.dealer.get_value(), self.player.get_value())
+        self.create_finish_objects()
 
-        if player_value > dealer_value:
-            print("\nYou win!")
-            self.WIN = True
-            self.game_end_message = game_end_messages["player_wins"]
-        elif player_value < dealer_value:
-            print("\nDealer wins!")
-            self.LOSE = True
-            self.game_end_message = game_end_messages["dealer_wins"]
-        else:
-            print("\nIt's a tie!")
-            self.TIE = True
-            self.game_end_message = game_end_messages["tie"]
+    def create_finish_objects(self):
+        """ Init finish objects """
+
+        self.player_state_label = Label(self)
+        if self.WIN:
+            self.player_state_label.update_text(win_message)
+        if self.LOSE:
+            self.player_state_label.update_text(lose_message)
+        if self.TIE:
+            self.player_state_label.update_text(tie_message)
+        self.player_state_label.percent_y(35)
+        self.description_label = Label(self, text=game_end_messages[self.game_end_state], font_size=70).percent_y(45)
+        self.back_button = Button(self, text=button_exit_message, foreground=(255, 255, 255), font_size=70).percent(10, 10)
+
+        self.finish_objects.append(self.player_state_label)
+        self.finish_objects.append(self.description_label)
+        self.finish_objects.append(self.back_button)
 
     def update(self, mouse_buttons, mouse_position, events, keys):
         """ Main game logic """
@@ -400,6 +421,23 @@ class Game:
 
                 return
 
+            for card in self.player_cards:
+                card.update()
+            for card in self.dealer_cards:
+                card.update()
+            self.borders.update()
+            for obj in self.game_objects:
+                obj.update()
+
+            if self.is_finish:
+                if self.back_button.clicked(mouse_buttons, mouse_position) or keys[pygame.K_ESCAPE]:
+                    self.change_mode("menu")
+
+                for obj in self.finish_objects:
+                    obj.update()
+
+                return
+
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for card in self.player_cards:
@@ -430,11 +468,3 @@ class Game:
                 else:
                     self.finish()
                     self.start_finish_game_counter = False
-
-            for card in self.player_cards:
-                card.update()
-            for card in self.dealer_cards:
-                card.update()
-            self.borders.update()
-            for obj in self.game_objects:
-                obj.update()
