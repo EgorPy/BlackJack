@@ -1,7 +1,7 @@
 """ Game logic objects """
 
 import random
-from messages import cards_values_message, cards_suits_message
+from messages import cards_values_messages, cards_suits_messages
 
 
 class Card:
@@ -15,7 +15,7 @@ class Card:
         self.suit = suit
 
     def __str__(self):
-        return f"{cards_values_message[self.value]} {cards_suits_message[self.suit]}"
+        return f"{cards_values_messages[self.value]} {cards_suits_messages[self.suit]}"
 
 
 class Deck:

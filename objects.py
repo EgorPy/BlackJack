@@ -484,27 +484,6 @@ class Entry(Button):
             return
         pygame.draw.rect(self.game.app.DISPLAY, self.foreground, pygame.Rect(self.pos, self.size), 1)
 
-    # def update(self, display):
-    #     mousePos = pygame.mouse.get_pos()
-    #     mouse = pygame.mouse.get_pressed(3)
-    #     display.blit(self.surface, self.position)
-    #     if touched(self.position[0], self.size[0], mousePos[0], 1,
-    #                self.position[1], self.size[1], mousePos[1], 1):
-    #         pygame.draw.rect(display, (0, 255, 255),
-    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
-    #         if mouse[0]:
-    #             self.is_selected = True
-    #     else:
-    #         pygame.draw.rect(display, self.foreground,
-    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
-    #         if mouse[0]:
-    #             self.is_selected = False
-    #     if self.is_selected:
-    #         pygame.draw.rect(display, (0, 255, 255),
-    #                          pygame.Rect(self.position, [self.length * (self.font_size - 8), self.font_size]), 1)
-    #     self.__init__(self.position, self.font_name, self.font_size, self.bold, self.smooth, self.foreground, self.text,
-    #                   self.background, self.length, self.is_selected)
-
 
 class Line(Vector):
     """ Line class for the Root Wars grid map. """

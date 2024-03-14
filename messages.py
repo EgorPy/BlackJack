@@ -24,7 +24,7 @@ diamonds_message = "Бубны"
 clubs_message = "Крести"
 spades_message = "Пики"
 
-cards_values_message = {
+cards_values_messages = {
     2: "2",
     3: "3",
     4: "4",
@@ -40,11 +40,29 @@ cards_values_message = {
     14: "A"
 }
 
-cards_suits_message = {
+cards_suits_messages = {
     0: diamonds_message,
     1: clubs_message,
     2: hearts_message,
     3: spades_message
+}
+
+game_end_messages = {
+    "player_busts": "У вас перебор карт",
+    "dealer_busts": "У дилера перебор карт",
+    "black_jack": "Блэк Джек!",
+    "player_wins": "Вы набрали больше очков",
+    "dealer_wins": "Крупье набрал больше очков",
+    "tie": "Вы набрали одинаковое количество очков"
+}
+
+relative_payments_messages = {
+    "player_busts": -1,
+    "dealer_busts": 1,
+    "black_jack": 1.5,
+    "player_wins": 1,
+    "dealer_wins": -1,
+    "tie": 0
 }
 
 # label texts
@@ -60,6 +78,10 @@ button_hit_message = "Взять карту"
 button_stand_message = "Хватит"
 # {} = score
 score_message = "Ваш счёт: {}"
+# {} = bid
+bid_message = "Ставка: {}"
+double_bid_message = "Удвоить ставку"
+bid_doubled_message = "Ставка удвоена"
 
 # button texts
 button_play_message = "Играть"
