@@ -1,6 +1,6 @@
 """
-Black Jack game. Graphic module: Pygame (SDL). Started developing 08.03.24
-Made using Origin Library.
+Игра Блэк Джек. Графический модуль: Pygame (SDL). Начало разработки: 08.03.24
+Сделано с помощью библиотеки Origin.
 """
 
 __author__ = "Egor Mironov"

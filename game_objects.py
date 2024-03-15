@@ -1,15 +1,15 @@
-""" Game logic objects """
+""" Классы, представляющие логику игровых объектов """
 
 import random
 from messages import cards_values_messages, cards_suits_messages
 
 
 class Card:
-    """ Represents game card """
+    """ Представляет карту """
 
     def __init__(self, value: int, suit: int):
-        # value can be from 2 to 14
-        # suit can be from 0 to 3
+        # value может быть от 2 до 14
+        # suit может быть от 0 до 3
 
         self.value = value
         self.suit = suit
@@ -19,7 +19,7 @@ class Card:
 
 
 class Deck:
-    """ Represents deck (full amount of cards in game) """
+    """ Представляет колоду карт """
 
     def __init__(self):
         self.cards = [Card(value, suit) for value in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
@@ -27,23 +27,24 @@ class Deck:
         random.shuffle(self.cards)
 
     def deal_card(self):
-        """ Gives player one card from the deck """
+        """ Выдаёт игроку одну карту из колоды """
 
         return self.cards.pop()
 
 
 class Player:
-    """ Player logic class """
+    """ Представляет логику игрока в Блэк Джек """
 
     def __init__(self):
         self.cards = []
 
     def add_card(self, card):
-        """ Adds one card to the player """
+        """ Добавляет одну карту """
+
         self.cards.append(card)
 
     def get_value(self):
-        """ Calculate the total value of the player """
+        """ Вычисляет общий счёт игрока """
 
         value = sum(self.get_card_value(card) for card in self.cards)
         num_aces = sum(1 for card in self.cards if card.value == 14)
@@ -54,7 +55,7 @@ class Player:
 
     @staticmethod
     def get_card_value(card):
-        """ Calculate value of one card of the player """
+        """ Вычисляет счёт одной карты игрока """
 
         if card.value == 14:
             return 11

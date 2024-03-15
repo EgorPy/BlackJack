@@ -1,4 +1,4 @@
-""" File with all in-game messages """
+""" Сообщения, используемые в игре """
 
 info_text_message = """
 Привет
@@ -65,7 +65,7 @@ relative_payments_messages = {
     "tie": 0
 }
 
-# label texts
+# текста надписей
 game_title_message = "Блэк Джек"
 rules_title_message = "Правила"
 rules_text_message = """
@@ -108,7 +108,7 @@ rules_text_message = """
 Приятной игры!
 """
 make_bid_message = "Сделайте ставку"
-# {} = player balance
+# {} = баланс игрока
 your_balance_message = "Ваш баланс: {}"
 your_bid_message = "Ваша ставка: "
 start_game_message = "Начать игру"
@@ -116,19 +116,19 @@ not_enough_money_message = "Недостаточно денег для став�
 cant_bid_zero_message = "Ставка должна быть больше 0"
 button_hit_message = "Взять карту"
 button_stand_message = "Хватит"
-# {} = score
+# {} = счёт
 score_message = "Ваш счёт: {}"
-# {} = bid
+# {} = ставка
 bid_message = "Ставка: {}"
 double_bid_message = "Удвоить ставку"
 bid_doubled_message = "Ставка удвоена"
 win_message = "Вы победили!"
 lose_message = "Вы проиграли"
 tie_message = "Ничья"
-# {} = money
+# {} = деньги
 prize_message = "Сумма: {}"
 
-# button texts
+# тексты кнопок
 button_play_message = "Играть"
 button_rules_message = "Правила"
 button_info_message = "Информация"

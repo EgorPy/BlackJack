@@ -1,3 +1,3 @@
-""" Game configuration file """
+""" Конфигурация """
 
 SAVE_MONEY_PATH = "money.txt"
