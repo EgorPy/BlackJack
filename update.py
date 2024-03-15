@@ -7,6 +7,7 @@ Update method of this class is called every 0.02 seconds (60 FPS (Depends on wha
 import os
 import pygame
 import config
+import webbrowser
 import game_objects
 from objects import *
 from messages import *
@@ -27,6 +28,7 @@ class Game:
 
         # app lists
         self.menu_objects = []
+        self.rules_objects = []
         self.info_objects = []
         self.bid_objects = []
         self.game_objects = []
@@ -66,25 +68,42 @@ class Game:
         return default
 
     def create_menu_objects(self):
-        """ Init main menu objects """
+        """ Init menu objects """
 
         self.game_title_label = Label(self, text=game_title_message).percent_y(10)
-        self.play_button = Button(self, text=button_play_message).percent_y(35)
-        self.info_button = Button(self, text=button_info_message).percent_y(55)
+        self.play_button = Button(self, text=button_play_message).percent_y(30)
+        self.rules_button = Button(self, text=button_rules_message).percent_y(45)
+        self.info_button = Button(self, text=button_info_message).percent_y(60)
         self.exit_button = Button(self, text=button_exit_message).percent_y(75)
 
         self.menu_objects.append(self.game_title_label)
         self.menu_objects.append(self.play_button)
+        self.menu_objects.append(self.rules_button)
         self.menu_objects.append(self.info_button)
         self.menu_objects.append(self.exit_button)
+
+    def create_rules_objects(self):
+        """ Init rules objects """
+
+        self.rules_label = Label(self, text=rules_title_message).center_x()
+        self.rules_text = Text(self, text=rules_text_message, font_size=50).center_x()
+        self.rules_text.update_y(self.rules_label.size[1] // 2, percent_x(self, 25))
+        self.rules_label.pos[1] = self.rules_text.pos_list[0][1] - self.rules_label.size[1] // 2
+        self.back_button = Button(self, text=button_back_message).percent(8, 50)
+
+        self.rules_objects.append(self.rules_label)
+        self.rules_objects.append(self.rules_text)
+        self.rules_objects.append(self.back_button)
 
     def create_info_objects(self):
         """ Init info objects """
 
-        self.info_text = Text(self, text=info_text_message.format(self.version)).percent_y(-3, percent_x(self, 25))
+        self.info_text = Text(self, text=info_text_message, font_size=50).percent_y(-3, percent_x(self, 25))
+        self.bot_button = Button(self, text="True Midjourney", font_size=50, foreground=(0, 200, 255), italic=True).percent(3, 70)
         self.back_button = Button(self, text=button_back_message).percent(8, 50)
 
         self.info_objects.append(self.info_text)
+        self.info_objects.append(self.bot_button)
         self.info_objects.append(self.back_button)
 
     def create_game_objects(self):
@@ -218,20 +237,19 @@ class Game:
             self.menu_objects.clear()
             self.bid_objects.clear()
             self.game_objects.clear()
+            self.rules_objects.clear()
             self.info_objects.clear()
             self.finish_objects.clear()
 
+        self.mode = mode
+        clear()
         if mode == "menu":
-            self.mode = mode
-            clear()
             self.create_menu_objects()
+        elif mode == "rules":
+            self.create_rules_objects()
         elif mode == "info":
-            self.mode = mode
-            clear()
             self.create_info_objects()
         elif mode == "game":
-            self.mode = mode
-            clear()
             self.create_game_objects()
 
     def scroll_info_text(self, event):
@@ -242,6 +260,22 @@ class Game:
                 self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
             elif event.y > 0 > self.info_text.pos[1]:
                 self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
+
+    def scroll_rules_text(self, event):
+        """ Scrolls rules text and title """
+
+        if event.type == pygame.MOUSEWHEEL:
+            self.rules_label.pos[1] += event.y * self.scroll_scale
+            if self.rules_label.pos[1] < -self.rules_label.size[1] // 2 + self.app.HEIGHT - self.rules_text.size[1]:
+                self.rules_label.pos[1] = -self.rules_label.size[1] // 2 + self.app.HEIGHT - self.rules_text.size[1]
+            if self.rules_label.pos[1] > self.app.HEIGHT - self.rules_label.size[1] // 2 - self.rules_text.size[1] // 2:
+                self.rules_label.pos[1] = self.app.HEIGHT - self.rules_label.size[1] // 2 - self.rules_text.size[1] // 2
+
+            self.rules_text.update_y(self.rules_text.pos[1] + event.y * self.scroll_scale, percent_x(self, 25))
+            if self.rules_text.pos_list[0][1] < self.app.HEIGHT - self.rules_text.size[1]:
+                self.rules_text.update_y(self.app.HEIGHT - self.rules_text.size[1], percent_x(self, 25))
+            if self.rules_text.pos_list[0][1] > self.app.HEIGHT - self.rules_text.size[1] // 2:
+                self.rules_text.update_y(self.app.HEIGHT - self.rules_text.size[1] // 2, percent_x(self, 25))
 
     def check_start_game(self):
         """ Check if player can enter a game """
@@ -401,10 +435,24 @@ class Game:
 
             if self.play_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("game")
+            if self.rules_button.clicked(mouse_buttons, mouse_position):
+                self.change_mode("rules")
             if self.info_button.clicked(mouse_buttons, mouse_position):
                 self.change_mode("info")
             if self.exit_button.clicked(mouse_buttons, mouse_position):
                 self.app.RUN = False
+
+        if self.mode == "rules":
+            self.app.DISPLAY.blit(self.background_image, (0, 0))
+
+            for obj in self.rules_objects:
+                obj.update()
+
+            for event in events:
+                self.scroll_rules_text(event)
+
+            if self.back_button.clicked(mouse_buttons, mouse_position) or keys[pygame.K_ESCAPE]:
+                self.change_mode("menu")
 
         if self.mode == "info":
             self.app.DISPLAY.blit(self.background_image, (0, 0))
@@ -418,7 +466,9 @@ class Game:
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
-            if self.back_button.clicked(mouse_buttons, mouse_position):
+            if self.bot_button.clicked(mouse_buttons, mouse_position):
+                webbrowser.open("https://t.me/TrueMidjourney_bot")
+            if self.back_button.clicked(mouse_buttons, mouse_position) or keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
         if self.mode == "game":
