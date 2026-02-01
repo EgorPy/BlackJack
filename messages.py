@@ -1,28 +1,23 @@
 """ File with all in-game messages """
 
 info_text_message = """
-Привет
+Hello
 
-Это простая игра Блэк Джек, 
-которая была создана для полуфинала олимпиады 
-Траектория Будущего в направлении Python
+This is a simple Black Jack game.
 
-Написана на Python
-с помощью библиотеки Pygame (SDL)
-И собственной библиотеки
-для простой и быстрой разработки на Pygame
-под названием Origin
+Written in Python
+using Pygame library (SDL)
+And my own library
+for quick and easy development on Pygame
+called Origin
 
-Фоновое изображение для игры было создано
-с помощью моего Telegram бота True Midjourney
-
-Дата создания 08.03.24
+Date of creation 08.03.24
 """
 
-hearts_message = "Черви"
-diamonds_message = "Бубны"
-clubs_message = "Крести"
-spades_message = "Пики"
+hearts_message = "Hearts"
+diamonds_message = "Diamonds"
+clubs_message = "Clubs"
+spades_message = "Spades"
 
 cards_values_messages = {
     2: "2",
@@ -48,12 +43,12 @@ cards_suits_messages = {
 }
 
 game_end_messages = {
-    "player_busts": "У вас перебор карт",
-    "dealer_busts": "У крупье перебор карт",
-    "black_jack": "Блэк Джек!",
-    "player_wins": "Вы набрали больше очков",
-    "dealer_wins": "Крупье набрал больше очков",
-    "tie": "Вы набрали одинаковое количество очков"
+    "player_busts": "You have too many cards.",
+    "dealer_busts": "The dealer busted his cards",
+    "black_jack": "Black Jack!",
+    "player_wins": "You scored more points",
+    "dealer_wins": "The dealer scored more points",
+    "tie": "You have the same number of points."
 }
 
 relative_payments_messages = {
@@ -66,71 +61,63 @@ relative_payments_messages = {
 }
 
 # label texts
-game_title_message = "Блэк Джек"
-rules_title_message = "Правила"
+game_title_message = "Black Jack"
+rules_title_message = "Rules"
 rules_text_message = """
-Блэк Джек - это классическая карточная игра, 
-также известная как "Двадцать одно". 
-Цель игры - набрать как можно большее 
-количество очков до 21.
+Blackjack is a classic card game,
+also known as "Twenty-one."
+The goal of the game is to accumulate as many points as possible, up to 21.
 
-Распределение очков:
-Карты с цифрами: от 2 до 10 очков
-Карты с фигурами (валеты, короли и дамы): 10 очков
-Тузы: 11 очков если нет перебора, иначе 1 очко
+Point distribution:
+Number cards: 2 to 10 points
+Face cards (Jacks, Kings, and Queens): 10 points
+Aces: 11 points unless busted, otherwise 1 point
 
-Перед началом игры необходимо сделать ставку.
-Она может быть от 1 до максимального количества
-денег игрока
+Before the game begins, a bet must be placed.
+It can be from 1 to the player's maximum amount
+of money.
 
-Игрок может запросить карту нажав на кнопку
-"Взять карту" во время игры
+A player can request a card by clicking the "Take a Card" button during the game.
 
-Также игрок может удвоить ставку,
-но только 1 раз. После этого ему сразу
-выдаётся 1 карта. После удвоения ставки
-игрок больше не может запрашивать карты
+A player can also double their bet,
+but only once. After doubling, they are immediately
+dealt with 1 card. After doubling the bet,
+the player can no longer request cards.
 
-После нажатия кнопки "Хватит"
-крупье берёт необходимое ему количество карт
-и открывает свою закрытую карту.
-После этого происходит подсчёт 
-очков крупье и игрока и их
-Победа, Проигрыш или Ничья
+After clicking the "Enough" button,
+the dealer takes the required number of cards
+and reveals their face-down card. After this, the dealer's and player's points are calculated and they are determined as either a Win, Loss, or Tie.
 
-Если игрок или крупье наберёт счёт больше 21 - 
-он проиграет из-за перебора карт
+If the player or dealer reaches a score greater than 21, they lose due to busting.
 
-Если игрок наберёт 21 очко 
-двумя картами (туз и 10, Валет, Дама, Король)
-то он победит Блэк Джеком!
+If the player reaches 21 points with two cards (Ace and 10, Jack, Queen, King), they win with Blackjack!
 
-Приятной игры!
+Have fun!
 """
-make_bid_message = "Сделайте ставку"
+make_bid_message = "Place your bet"
 # {} = player balance
-your_balance_message = "Ваш баланс: {}"
-your_bid_message = "Ваша ставка: "
-start_game_message = "Начать игру"
-not_enough_money_message = "Недостаточно денег для ставки"
-cant_bid_zero_message = "Ставка должна быть больше 0"
-button_hit_message = "Взять карту"
-button_stand_message = "Хватит"
+your_balance_message = "Your balance: {}"
+your_bid_message = "Your bet: "
+start_game_message = "Start game"
+not_enough_money_message = "Not enough money to bet"
+cant_bid_zero_message = "The bet must be greater than 0"
+button_hit_message = "Hit"
+button_stand_message = "Stay"
 # {} = score
-score_message = "Ваш счёт: {}"
+score_message = "Your score: {}"
 # {} = bid
-bid_message = "Ставка: {}"
-double_bid_message = "Удвоить ставку"
-bid_doubled_message = "Ставка удвоена"
-win_message = "Вы победили!"
-lose_message = "Вы проиграли"
-tie_message = "Ничья"
+bid_message = "Bet: {}"
+double_bid_message = "Double down"
+bid_doubled_message = "The stakes have been doubled"
+win_message = "You win!"
+lose_message = "You lost"
+tie_message = "Draw"
 # {} = money
-prize_message = "Сумма: {}"
+prize_message = "Total: {}"
 
 # button texts
-button_play_message = "Играть"
-button_rules_message = "Правила"
-button_info_message = "Информация"
-button_exit_message = "Выход"
-button_back_message = "Назад"
+button_play_message = "Play"
+button_rules_message = "Rules"
+button_info_message = "Info"
+button_exit_message = "Exit"
+button_back_message = "Back"
