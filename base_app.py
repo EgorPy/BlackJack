@@ -1,6 +1,4 @@
-"""
-Base app class written on module Pygame.
-"""
+""" Содержит базовый класс приложения. """
 
 from update import *
 import pygame
@@ -8,13 +6,11 @@ import time
 
 
 class App:
-    """ Base app for pygame projects """
+    """ Базовый класс для создания оконных приложений """
 
     def __init__(self, app_name=None):
-        """ Main initialization """
-
         def init_display(display_width, display_height, display_mode):
-            """ Display initialization """
+            """ Инициализация окна """
 
             pygame.display.quit()
             self.WIDTH = display_width
@@ -46,7 +42,7 @@ class App:
         self.game = Game(self)
 
     def run(self):
-        """ Main script loop """
+        """ Главный цикл приложения """
 
         while self.RUN:
             events = pygame.event.get()

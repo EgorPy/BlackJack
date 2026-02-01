@@ -1,24 +1,24 @@
-""" Useful math functions """
+""" Полезные математические функции """
 
 import math
 
 
 def percent_y(game, percent=0):
-    """ Calculates screen height in percents """
+    """ Вычисляет количество пикселей в данном проценте высоты экрана """
 
     one_percent = game.app.HEIGHT / 100
     return one_percent * percent
 
 
 def percent_x(game, percent=0):
-    """ Calculates screen width in percents """
+    """ Вычисляет количество пикселей в данном проценте ширины экрана """
 
     one_percent = game.app.WIDTH / 100
     return one_percent * percent
 
 
 def touched(x1: int, width1: int, x2: int, width2: int, y1: int, height1: int, y2: int, height2: int) -> bool:
-    """ Checks if one object is touching other object """
+    """ Проверяет коллизию 2 объектов """
 
     if ((x1 <= x2 <= (x1 + width1) and y1 <= y2 <= (y1 + height1)) or
             (x1 <= (x2 + width2) and (x1 + width1) >= x2 and y1 <= (y2 + height2) and (y1 + height1) >= y2)):
@@ -27,26 +27,26 @@ def touched(x1: int, width1: int, x2: int, width2: int, y1: int, height1: int, y
 
 
 def deg_to_rad(degree: float) -> float:
-    """ Converts degrees to radians """
+    """ Конвертирует градусы в радианы """
 
     return degree * math.pi / 180
 
 
 def rad_to_deg(radian: float) -> float:
-    """ Converts radians to degrees """
+    """ Конвертирует радианы в градусы """
 
     return radian * 180 / math.pi
 
 
 def rgb_to_hex(r=0, g=0, b=0) -> str:
-    """ Converts rgb value to hex value """
+    """ Конвертирует RGB цвет в HEX цвет """
 
     return "#" + str(hex(r))[2:].rjust(2, "0").upper() + str(hex(g))[2:].rjust(2, "0").upper() + str(hex(b))[2:].rjust(
         2, "0").upper()
 
 
 def distance_to_obj(pos1=None, pos2=None) -> float:
-    """ Gets distance between two positions using Pythagorean theorem """
+    """ Вычисляет расстояние до объекта по теореме Пифагора """
 
     if pos1 is None:
         pos1 = [0, 0]
@@ -61,9 +61,8 @@ def distance_to_obj(pos1=None, pos2=None) -> float:
 
 def rotate_to_cord(pos1=None, pos2=None) -> float:
     """
-    :param pos1: pos of the object that must be turned
-    :param pos2: pos of the object to turn to
-    :return: angle to turn to face to given position
+    Вычисляет угол, на который должен повернуться объект,
+    расположенный в pos1, чтобы повернуться к координате pos2
     """
 
     if pos1 is None:
@@ -85,7 +84,7 @@ def rotate_to_cord(pos1=None, pos2=None) -> float:
 
 
 def add_brightness(color: list, value: int) -> list:
-    """ Adds brightness to given color """
+    """ Добавляет яркость к цвету """
 
     r, g, b = color
     r += value
@@ -110,7 +109,7 @@ def add_brightness(color: list, value: int) -> list:
 
 
 def sub_brightness(color: list, value: int) -> list:
-    """ Subtracts brightness to given color """
+    """ Вычитает яркость от цвета """
 
     r, g, b = color
     r -= value
@@ -123,7 +122,7 @@ def sub_brightness(color: list, value: int) -> list:
 
 
 def check_value(c: int):
-    """ Checks if value is from 0 to 255 """
+    """ Ограничивает диапазон числа c от 0 до 255 """
 
     if c > 255:
         return 255

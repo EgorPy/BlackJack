@@ -1,7 +1,7 @@
 """
-This file contains main game logic in a Game class
-This class is invoked in main.py file
-Update method of this class is called every 0.02 seconds (60 FPS (Depends on what the value of self.MAX_FPS is))
+Данный файл содержит главную логику игры в классе Game
+Этот класс вызывается в файле main.py
+Метод update этого класса вызывается каждые 0.02 секунды (60 FPS (Зависит от self.MAX_FPS))
 """
 
 import os
@@ -13,19 +13,17 @@ from messages import *
 
 
 class Game:
-    """
-    Root Wars game class
-    """
+    """ Класс игры Блэк Джек """
 
     def __init__(self, app):
-        """ Game initialisation """
+        """ Инициализация игры """
 
-        # app variables
+        # переменные приложения
         self.app = app
         self.mode = "menu"
         self.version = "1.0"
 
-        # app lists
+        # списки с объектами приложения
         self.menu_objects = []
         self.rules_objects = []
         self.info_objects = []
@@ -33,29 +31,23 @@ class Game:
         self.game_objects = []
         self.finish_objects = []
 
-        # game settings variables that you can change (DEFAULT SETTINGS)
+        # настройки игры, которые можно менять (стандартные настройки)
         self.scroll_scale = 40
-        self.cards_dealt = 2  # how many cards player and dealer (computer) will get at the start
         self.background_image = pygame.transform.scale(pygame.image.load("background.jpg"), [self.app.WIDTH, self.app.HEIGHT])
 
-        # settings variables
-        self.SETTINGS_OBJECTS_CREATED = False
-        self.FPS_ENABLED = False
         self.prev_mouse_pos = [0, 0]
-        self.mouse_dx = 0
-        self.fps_label = Label(self, foreground=(0, 255, 0), font_size=40, font_name="Courier").percent(95, 2)
 
         self.create_menu_objects()
 
     @staticmethod
     def save_money(money: int):
-        """ Saves player money to the file """
+        """ Сохраняет деньги игрока в файл """
 
         with open(config.SAVE_MONEY_PATH, "w") as file:
             file.write(str(money))
 
     def load_money(self, default=5000):
-        """ Loads player money from the file. If it does not exist, it will return default value """
+        """ Загружает деньги игрока из файла. Если его не существует, функция вернёт default """
 
         if os.path.exists(config.SAVE_MONEY_PATH):
             with open(config.SAVE_MONEY_PATH, "r") as file:
@@ -67,7 +59,7 @@ class Game:
         return default
 
     def create_menu_objects(self):
-        """ Init menu objects """
+        """ Инициализация объектов меню """
 
         self.game_title_label = Label(self, text=game_title_message).percent_y(10)
         self.play_button = Button(self, text=button_play_message).percent_y(30)
@@ -82,7 +74,7 @@ class Game:
         self.menu_objects.append(self.exit_button)
 
     def create_rules_objects(self):
-        """ Init rules objects """
+        """ Инициализация объектов правил """
 
         self.rules_label = Label(self, text=rules_title_message).center_x()
         self.rules_text = Text(self, text=rules_text_message, font_size=50).center_x()
@@ -95,7 +87,7 @@ class Game:
         self.rules_objects.append(self.back_button)
 
     def create_info_objects(self):
-        """ Init info objects """
+        """ Инициализация объектов информации """
 
         self.info_text = Text(self, text=info_text_message, font_size=50).percent_y(-3, percent_x(self, 25))
         # self.bot_button = Button(self, text="True Midjourney", font_size=50, foreground=(0, 200, 255), italic=True).percent(3, 70)
@@ -106,7 +98,7 @@ class Game:
         self.info_objects.append(self.back_button)
 
     def create_game_objects(self):
-        """ Init game objects """
+        """ Инициализация объектов игры """
 
         self.is_bid = True
         self.is_bid_doubled = False
@@ -125,34 +117,32 @@ class Game:
 
         self.CARD_SHOW_STEP = 500
 
-        # do not change these values
         self.CARD_WIDTH = 160
         self.CARD_HEIGHT = 230
         self.CARD_MARGIN_X = 11.5
         self.CARD_MARGIN_Y = 9
 
-        # variables to store the dragging state
+        # переменные для сохранения состояния скролла карт
         self.dragging = False
         self.drag_offset_x = 0
         self.player_cards_width = self.player_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
         self.dealer_cards_width = self.dealer_cards_count * (self.CARD_WIDTH + self.CARD_MARGIN_X)
 
-        # create game logic objects
+        # инициализация игровых объектов логики игры
         self.deck = game_objects.Deck()
         self.player = game_objects.Player()
         self.dealer = game_objects.Player()
 
-        # for i in range(self.player_cards_count):
-        self.player.add_card(self.deck.deal_card())
-        self.player.add_card(self.deck.deal_card())
+        for i in range(self.player_cards_count):
+            self.player.add_card(self.deck.deal_card())
         for i in range(self.dealer_cards_count):
             self.dealer.add_card(self.deck.deal_card())
 
-        # player's deck of cards represented by numbers from 2 to 14
+        # колода карт игрока представленная числами от 2 до 14
         x1 = [card.value for card in self.player.cards]
         y1 = [card.suit for card in self.player.cards]
 
-        # dealer's deck of cards represented by numbers from 2 to 14
+        # колода карт крупье представленная числами от 2 до 14
         x2 = [card.value for card in self.dealer.cards]
         y2 = [card.suit for card in self.dealer.cards]
         x2[0] = 15
@@ -181,7 +171,7 @@ class Game:
         self.create_game_widgets()
 
     def create_game_widgets(self):
-        """ Init game UI elements """
+        """ Инициализация элементов интерфейса игры """
 
         self.score_label = Label(self, text=score_message.format(self.player.get_value()), font_size=60).percent(10, 65)
         self.hit_button = Button(self, text=button_hit_message, foreground=(255, 255, 255)).percent(10, 75)
@@ -204,7 +194,7 @@ class Game:
         self.game_objects.append(self.double_bid_button)
 
     def create_bid_objects(self):
-        """ Init bid game phase objects """
+        """ Инициализация объектов фазы ставки в игре """
 
         self.bid_main_label = Label(self, text=make_bid_message).percent_y(10)
         self.balance_label = Label(self, text=your_balance_message.format(self.player_balance), font_size=70).percent_y(35)
@@ -226,12 +216,12 @@ class Game:
 
     def change_mode(self, mode):
         """
-        Changes mode to a new mode if it's matches one of the possible modes,
-        clearing all variables of all modes except settings
+        Меняет фазу приложения на другую
+        И очищает все списки с объектами приложения
         """
 
         def clear():
-            """ Clears all variables of all modes except settings """
+            """ Очищает все списки с объектами приложения """
 
             self.menu_objects.clear()
             self.bid_objects.clear()
@@ -252,7 +242,7 @@ class Game:
             self.create_game_objects()
 
     def scroll_info_text(self, event):
-        """ Scrolls self.info_text on mouse wheel event """
+        """ Позволяет скролить self.info_text """
 
         if event.type == pygame.MOUSEWHEEL:
             if event.y < 0 and self.info_text.pos[1] > -percent_y(self, 3):
@@ -261,7 +251,7 @@ class Game:
                 self.info_text.update_y(self.info_text.pos[1] + event.y * self.scroll_scale, x=percent_x(self, 25))
 
     def scroll_rules_text(self, event):
-        """ Scrolls rules text and title """
+        """ Позволяет скролить текст и надпись с правилами """
 
         if event.type == pygame.MOUSEWHEEL:
             self.rules_label.pos[1] += event.y * self.scroll_scale
@@ -277,7 +267,7 @@ class Game:
                 self.rules_text.update_y(self.app.HEIGHT - self.rules_text.size[1] // 2, percent_x(self, 25))
 
     def check_start_game(self):
-        """ Check if player can enter a game """
+        """ Проверяет, может ли игрок зайти в игру с его ставкой """
 
         bid = int(self.bid_entry.text)
         if bid > self.player_balance:
@@ -293,7 +283,7 @@ class Game:
         self.is_bid = False
 
     def add_player_card(self):
-        """ Adds one card to player """
+        """ Выдаёт игроку одну карту из колоды """
 
         self.player.add_card(self.deck.deal_card())
         self.score_label.update_text(score_message.format(self.player.get_value()))
@@ -319,7 +309,7 @@ class Game:
             self.finish()
 
     def add_dealer_card(self):
-        """ Adds one card to dealer """
+        """ Выдаёт крупье одну карту из колоды """
 
         self.dealer.add_card(self.deck.deal_card())
         x2 = [card.value for card in self.dealer.cards]
@@ -340,7 +330,7 @@ class Game:
             card.pos[0] = (self.app.WIDTH - self.dealer_cards_width) // 2 + i * (self.CARD_WIDTH + self.CARD_MARGIN_X)
 
     def dealer_turn(self):
-        """ Dealer's logic """
+        """ Логика крупье """
 
         while self.dealer.get_value() < 17:
             self.add_dealer_card()
@@ -353,7 +343,7 @@ class Game:
             self.finish()
 
     def reveal_dealer_card(self):
-        """ Reveals dealer card """
+        """ Открывает скрытую карту крупье """
 
         x2 = [card.value for card in self.dealer.cards]
         y2 = [card.suit for card in self.dealer.cards]
@@ -368,7 +358,7 @@ class Game:
         ) for i in range(self.dealer_cards_count)]
 
     def double_bid(self):
-        """ Doubles player bid """
+        """ Удваивает ставку игрока """
 
         if self.player_balance >= self.bid * 2:
             self.is_bid_doubled = True
@@ -378,7 +368,7 @@ class Game:
             self.double_bid_button.update_text(bid_doubled_message)
 
     def finish(self):
-        """ Finish game """
+        """ Финиш игры """
 
         self.reveal_dealer_card()
         self.is_finish = True
@@ -402,7 +392,7 @@ class Game:
         self.create_finish_objects()
 
     def create_finish_objects(self):
-        """ Init finish objects """
+        """ Инициализация объектов финиша игры """
 
         self.player_state_label = Label(self)
         if self.WIN:
@@ -424,7 +414,7 @@ class Game:
         self.finish_objects.append(self.back_button)
 
     def update(self, mouse_buttons, mouse_position, events, keys):
-        """ Main game logic """
+        """ Основная логика игры """
 
         if self.mode == "menu":
             self.app.DISPLAY.blit(self.background_image, (0, 0))
