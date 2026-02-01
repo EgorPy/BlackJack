@@ -7,7 +7,6 @@ Update method of this class is called every 0.02 seconds (60 FPS (Depends on wha
 import os
 import pygame
 import config
-import webbrowser
 import game_objects
 from objects import *
 from messages import *
@@ -99,11 +98,11 @@ class Game:
         """ Init info objects """
 
         self.info_text = Text(self, text=info_text_message, font_size=50).percent_y(-3, percent_x(self, 25))
-        self.bot_button = Button(self, text="True Midjourney", font_size=50, foreground=(0, 200, 255), italic=True).percent(3, 70)
+        # self.bot_button = Button(self, text="True Midjourney", font_size=50, foreground=(0, 200, 255), italic=True).percent(3, 70)
         self.back_button = Button(self, text=button_back_message).percent(8, 50)
 
         self.info_objects.append(self.info_text)
-        self.info_objects.append(self.bot_button)
+        # self.info_objects.append(self.bot_button)
         self.info_objects.append(self.back_button)
 
     def create_game_objects(self):
@@ -466,8 +465,6 @@ class Game:
             if keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
-            if self.bot_button.clicked(mouse_buttons, mouse_position):
-                webbrowser.open("https://t.me/TrueMidjourney_bot")
             if self.back_button.clicked(mouse_buttons, mouse_position) or keys[pygame.K_ESCAPE]:
                 self.change_mode("menu")
 
