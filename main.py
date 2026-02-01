@@ -3,7 +3,7 @@ Black Jack game. Graphic module: Pygame (SDL). Started developing 08.03.24
 Made using Origin Library.
 """
 
-__author__ = "Egor Mironov"
+__author__ = "ved3v"
 
 from base_app import App
 
